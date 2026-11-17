@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automatic Income Tax Calculator - FY 2026-27 (AY 2027-28)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: #f4f6f8; color: #111; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 12px; }
+
+  /* Banner */
+  .banner { background: #0b3d66; color: #fff; padding: 14px 16px; border-radius: 8px; margin-bottom: 14px; text-align: center; }
+  .banner h1 { margin: 0 0 4px 0; font-size: 19px; line-height: 1.25; }
+  .banner .sub { font-size: 12.5px; opacity: 0.95; line-height: 1.5; }
+  .banner .sub b { color: #ffd54f; }
+
+  /* Section */
+  section { background: #fff; border: 1px solid #d0d7e0; border-radius: 8px; margin-bottom: 14px; padding: 14px; }
+  section h2 { font-size: 15px; margin: 0 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid #0b3d66; color: #0b3d66; display: flex; justify-content: space-between; align-items: center; }
+  section h2 .tag { font-size: 11px; background: #e8f0fa; color: #0b3d66; padding: 2px 8px; border-radius: 10px; }
+
+  /* Config grid */
+  .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 10px; }
+  .cfg-item { border: 1px solid #cfd8e3; border-radius: 6px; padding: 8px 10px; background: #fafbfc; }
+  .cfg-item label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #334155; }
+  .cfg-item select, .cfg-item input { width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid #b9c6d4; border-radius: 4px; background: #fff; }
+  .cfg-item select:focus, .cfg-item input:focus { outline: 2px solid #0b3d66; border-color: #0b3d66; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; align-items: center; }
+  button { padding: 8px 14px; font-size: 13px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+  button.primary { background: #0b3d66; color: #fff; }
+  button.primary:hover { background: #083053; }
+  button.secondary { background: #ffffff; color: #0b3d66; border: 1px solid #0b3d66; }
+  button.secondary:hover { background: #eef4fb; }
+  button.danger { background: #b91c1c; color: #fff; }
+  button.danger:hover { background: #991b1b; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Table - Numbers fully visible without clipping */
+  table.data { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12.5px; }
+  table.data th, table.data td { border: 1px solid #9db2c4; padding: 5px 6px; text-align: right; white-space: nowrap; min-width: 72px; }
+  table.data th { background: #0b3d66; color: #fff; position: sticky; top: 0; z-index: 2; }
+  table.data td:first-child, table.data th:first-child { text-align: left; position: sticky; left: 0; background: #fff; z-index: 3; min-width: 115px; }
+  table.data th:first-child { background: #0b3d66; z-index: 4; }
+  table.data tr.total-row { font-weight: 800; background: #eaf0f6 !important; border-top: 3px solid #0b3d66; }
+  table.data tr.total-row td:first-child { background: #eaf0f6 !important; }
+  table.data tr.highlight { background: #fffde7; }
+  input.num { width: 100%; min-width: 64px; border: none; background: transparent; text-align: right; font-size: 12.5px; font-weight: 600; color: #111; padding: 2px 3px; }
+  input.num:focus { outline: 2px solid #0b3d66; background: #fff; border-radius: 2px; }
+  input.mon { width: 100%; text-align: left; font-weight: 700; background: #eef4fb; border: none; padding: 3px 4px; }
+  .wrap-table { overflow-x: auto; width: 100%; }
+
+  .note { font-size: 11.5px; color: #5b6b7c; margin: 6px 0 0 0; line-height: 1.5; }
+  .note b { color: #0b3d66; }
+
+  /* Form-16 & Kannada output */
+  .form16 { font-size: 12px; line-height: 1.45; }
+  .form16 table { width: 100%; border-collapse: collapse; margin: 6px 0; }
+  .form16 th, .form16 td { border: 1px solid #6b7a8c; padding: 4px 6px; text-align: right; font-size: 11.5px; }
+  .form16 th { background: #eef4fb; }
+  .form16 td:first-child, .form16 th:first-child { text-align: left; }
+  .form16 .bold { font-weight: 800; }
+  .form16 .total-row { background: #eaf0f6; font-weight: 800; }
+  .kannada { font-family: 'Noto Sans Kannada', 'Segoe UI', sans-serif; }
+
+  .print-section { page-break-after: always; }
+  .print-section:last-child { page-break-after: auto; }
+
+  .hide-on-print { display: block; }
+  .show-on-print { display: none; }
+
+  footer { text-align: center; padding: 16px; font-size: 12px; color: #5b6b7c; border-top: 1px solid #d0d7e0; }
+
+  /* Print */
+  @page { size: A4 landscape; margin: 8mm; }
+  @media print {
+    body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .container { max-width: 100%; padding: 0; }
+    section { border: none; box-shadow: none; page-break-inside: avoid; }
+    .hide-on-print { display: none !important; }
+    .show-on-print { display: block !important; }
+    .no-print { display: none !important; }
+    table.data { font-size: 11px; }
+    table.data th, table.data td { padding: 4px 5px; }
+    .print-section { page-break-after: always; }
+    .print-section:last-child { page-break-after: auto; }
+    .page-a4 { width: 100%; min-height: 0; padding: 0; margin: 0; background: #fff; box-sizing: border-box; }
+    .page-a4 tr { break-inside: avoid; page-break-inside: avoid; }
+  }
+
+  @media (max-width: 700px) {
+    .container { padding: 6px; }
+    table.data th, table.data td { padding: 4px 4px; font-size: 11px; min-width: 68px; }
+    .config-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="banner hide-on-print">
+    <h1>AUTOMATIC INCOME TAX CALCULATOR &mdash; FY 2026-27 (AY 2027-28)</h1>
+    <div class="sub">
+      <b>CREATED BY</b> SCHOOL RESOURCE CENTER &nbsp;|&nbsp;
+      DA: 15.75%/18% &nbsp;|&nbsp; NPS (10%): <span id="ui-nps">YES</span>/NO &nbsp;|&nbsp;
+      KASS 350 &amp; MA 500 &nbsp;|&nbsp; PT: Rs.200 &nbsp;|&nbsp; EL Month Option &nbsp;|&nbsp;
+      HRA: 7.5%/15%/20% &nbsp;|&nbsp; PH 6%: <span id="ui-ph">YES</span>/NO
+    </div>
+    <div class="sub" style="margin-top:6px;"><span id="save-status">✔ ಸ್ವಯಂ ಸೇವ್ ಆಗಿದೆ</span> &nbsp;|&nbsp; 🔍 view ನೋಡಿ &nbsp;|&nbsp; ⚡ Auto DA + HRA + NPS + KASS/MA + PT &nbsp;|&nbsp; 📋 Copy Mar-26 to All &nbsp;|&nbsp; 💾 ಸೇವ್ &nbsp;|&nbsp; 🖨️ ಪ್ರಿಂಟ್ A4 (5 ಪುಟಗಳು) &nbsp;|&nbsp; 🧹 Clear 0 &nbsp;|&nbsp; 🔄 ರಿಸೆಟ್</div>
+  </div>
+
+  <!-- Employee Details -->
+  <section id="emp-section" class="hide-on-print">
+    <h2>COMPUTATION STATEMENT OF INCOME TAX &nbsp;<span class="tag">FY 2026-27 | AY 2027-28</span></h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px;">
+      <div><label>SCHOOL / OFFICE</label><input type="text" id="txt-school" placeholder="ಶಾಲೆ / ಕಚೇರಿಯ ಹೆಸರು"></div>
+      <div><label>EMPLOYEE NAME</label><input type="text" id="txt-ename" placeholder="ನೌಕರರ ಹೆಸರು"></div>
+      <div><label>BANK NAME</label><input type="text" id="txt-bank" placeholder="ಬ್ಯಾಂಕ್ ಹೆಸರು (ಉದಾ: BDCC / SBI)"></div>
+      <div><label>DESIGNATION</label><input type="text" id="txt-desig" placeholder="ಪದನಾಮ / ಹುದ್ದೆ" value="Teacher"></div>
+      <div><label>BANK A/C NO</label><input type="text" id="txt-acno" placeholder="ಬ್ಯಾಂಕ್ ಖಾತೆ ಸಂಖ್ಯೆ"></div>
+      <div><label>PAN NO</label><input type="text" id="txt-pan" placeholder="PAN ಸಂಖ್ಯೆ"></div>
+      <div><label>KGID NO</label><input type="text" id="txt-kgid" placeholder="KGID ಸಂಖ್ಯೆ"></div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+      <div><label>HRA, KASS &amp; MA</label><select id="sel-hra" onchange="calcAll()"><option value="7.5">HRA: C - 7.5%</option><option value="15">HRA: 15%</option><option value="20">HRA: 20%</option></select></div>
+      <div><label>KASS (350)</label><select id="sel-kass" onchange="calcAll()"><option value="NO">NO</option><option value="YES">YES</option></select></div>
+      <div><label>MA (500)</label><select id="sel-ma" onchange="calcAll()"><option value="YES">YES</option><option value="NO">NO</option></select></div>
+      <div><label>EL ತಿಂಗಳು</label><select id="sel-el" onchange="calcAll()"><option value="NONE">NONE (0)</option><option value="MAR">Mar-26</option><option value="APR">Apr-26</option><option value="MAY">May-26</option><option value="JUN">Jun-26</option><option value="JUL">Jul-26</option><option value="AUG">Aug-26</option><option value="SEP">Sep-26</option><option value="OCT">Oct-26</option><option value="NOV">Nov-26</option><option value="DEC">Dec-26</option><option value="JAN">Jan-27</option><option value="FEB">Feb-27</option></select></div>
+      <div style="grid-column: 1 / -1;"><label>NPS, PH &amp; REGIME</label><div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <label style="font-size:12px; font-weight:700; margin:0;">NPS: <select id="sel-nps" onchange="calcAll()" style="width:auto; padding:4px;"><option value="YES">YES</option><option value="NO">NO</option></select></label>
+        <label style="font-size:12px; font-weight:700; margin:0;">PH: <select id="sel-ph" onchange="calcAll()" style="width:auto; padding:4px;"><option value="YES">YES</option><option value="NO">NO</option></select></label>
+        <label style="font-size:12px; font-weight:700; margin:0;">NEW REG: <select id="sel-regime" onchange="calcAll()" style="width:auto; padding:4px;"><option value="YES">YES</option><option value="NO">NO</option></select></label>
+      </div></div>
+    </div>
+  </section>
+
+  <!-- Monthly Table -->
+  <section id="table-section" class="hide-on-print">
+    <h2>MONTHLY SALARY &amp; DEDUCTION STATEMENT &nbsp;<span class="tag">Auto DA + HRA + NPS + KASS/MA + PT</span></h2>
+    <div class="btn-row" style="margin-bottom:8px;">
+      <button type="button" class="primary" onclick="copyMarToAll()">📋 Copy Mar-26 to All</button>
+      <button type="button" class="secondary" onclick="saveData(true)">💾 ಸೇವ್ / Save</button>
+      <button type="button" class="secondary" onclick="loadData()">📂 Load Saved</button>
+      <button type="button" class="danger" onclick="clearZeros()">🧹 Clear 0</button>
+      <button type="button" class="secondary" onclick="resetForm()">🔄 ರಿಸೆಟ್ / Reset</button>
+      <button type="button" class="primary" onclick="printAll()">🖨️ Print A4 (5 Pages)</button>
+    </div>
+    <div class="wrap-table">
+      <table class="data" id="salary-table">
+        <thead>
+          <tr>
+            <th>MONTH</th>
+            <th>BASIC PAY</th>
+            <th>DA (15.75/18%)</th>
+            <th>HRA (7.5%)</th>
+            <th>CCA</th>
+            <th>MA (500)</th>
+            <th>Spl/Tchr Allow</th>
+            <th>PH (6%)</th>
+            <th>Other Allow</th>
+            <th>GROSS SALARY</th>
+            <th>KGID</th>
+            <th>LIC</th>
+            <th>GIS</th>
+            <th>KASS (0)</th>
+            <th>P.T (200)</th>
+            <th>GPF</th>
+            <th>NPS (10%)</th>
+            <th>IT / TDS</th>
+            <th>TOTAL DEDUCT</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="note"><b>* DA:</b> Jan-Jun 15.75% &amp; Jul-Feb 18% &nbsp;|&nbsp; <b>HRA:</b> % of Basic Pay &nbsp;|&nbsp; <b>NPS:</b> 10% of (Basic + DA) &nbsp;|&nbsp; <b>PH:</b> 6% of Basic Pay &nbsp;|&nbsp; <b>MA:</b> Rs.500 fixed &nbsp;|&nbsp; <b>KASS:</b> Rs.350 fixed &nbsp;|&nbsp; <b>PT:</b> Rs.200 fixed</div>
+  </section>
+
+  <!-- Form-16 Output -->
+  <section id="form16-section" class="hide-on-print">
+    <h2>FORM-16 [See rule 31(1)(a)] &mdash; FY 2026-27 (AY 2027-28) &nbsp;<span class="tag">Auto-generated</span></h2>
+    <div class="form16" id="form16-output"></div>
+  </section>
+
+  <!-- Kannada Output -->
+  <section id="kannada-section" class="hide-on-print">
+    <h2>ಆದಾಯ ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರದ ನಮೂನೆ (2026-27) &nbsp;<span class="tag">Kannada Tax Computation Form</span></h2>
+    <div class="form16 kannada" id="kannada-output"></div>
+  </section>
+
+  <!-- Print-only A4 pages -->
+  <div id="print-pages" class="show-on-print">
+    <div class="page-a4 print-section" id="page1"></div>
+    <div class="page-a4 print-section" id="page2"></div>
+    <div class="page-a4 print-section" id="page3"></div>
+    <div class="page-a4 print-section" id="page4"></div>
+    <div class="page-a4 print-section" id="page5"></div>
+  </div>
+
+  <footer class="hide-on-print">
+    CREATED BY SCHOOL RESOURCE CENTER / INCOME TAX COMPUTATION STATEMENT FY 2026-27 (AY 2027-28) &nbsp;|&nbsp; New Regime = YES | NPS = YES | HRA: 7.5% | KASS: NO
+  </footer>
+</div>
+
+<script>
+  /* ============ STATE ============ */
+  const MONTHS = ['Mar-26','Apr-26','May-26','Jun-26','Jul-26','Aug-26','Sep-26','Oct-26','Nov-26','Dec-26','Jan-27','Feb-27'];
+  const SPECIAL_ROWS = [
+    'DA (Jan26-Apr26)','Arrears','DA (Jul26-Oct26)','Arrears 1','Arrears 2',
+    'EL Encash','Prev Yr Arrears','OTHERS'
+  ];
+  const COL_KEYS = ['basic','da','hra','cca','ma','spl','ph','other','gross','kgid','lic','gis','kass','pt','gpf','nps','it','totalDeduct'];
+
+  let state = {
+    school: '', ename: '', bank: '', desig: 'Teacher', acno: '', pan: '', kgid: '',
+    hra: '7.5', kass: 'NO', ma: 'YES', el: 'NONE',
+    nps: 'YES', ph: 'YES', regime: 'YES',
+    rows: []
+  };
+
+  /* ============ INIT ============ */
+  function init() {
+    const saved = localStorage.getItem('itc_fy2627_state');
+    if (saved) {
+      try { state = JSON.parse(saved); } catch(e) {}
+    }
+    if (!state.rows || state.rows.length !== MONTHS.length) {
+      state.rows = MONTHS.map(m => ({
+        month: m, basic: 0, da: 0, hra: 0, cca: 0, ma: 0, spl: 0, ph: 0, other: 0,
+        gross: 0, kgid: 0, lic: 0, gis: 0, kass: 0, pt: 0, gpf: 0, nps: 0, it: 0, totalDeduct: 0
+      }));
+    }
+    if (state.rows.every(r => r.basic === 0)) {
+      state.rows[0] = { month:'Mar-26', basic:62800, da:9891, hra:4710, cca:0, ma:500, spl:0, ph:3768, other:0,
+        gross:81669, kgid:6000, lic:1684, gis:480, kass:0, pt:200, gpf:0, nps:7269, it:0, totalDeduct:15633 };
+    }
+    renderUI();
+    calcAll();
+  }
+
+  /* ============ RENDER UI CONTROLS ============ */
+  function renderUI() {
+    document.getElementById('txt-school').value = state.school || '';
+    document.getElementById('txt-ename').value = state.ename || '';
+    document.getElementById('txt-bank').value = state.bank || '';
+    document.getElementById('txt-desig').value = state.desig || '';
+    document.getElementById('txt-acno').value = state.acno || '';
+    document.getElementById('txt-pan').value = state.pan || '';
+    document.getElementById('txt-kgid').value = state.kgid || '';
+    document.getElementById('sel-hra').value = state.hra;
+    document.getElementById('sel-kass').value = state.kass;
+    document.getElementById('sel-ma').value = state.ma;
+    document.getElementById('sel-el').value = state.el;
+    document.getElementById('sel-nps').value = state.nps;
+    document.getElementById('sel-ph').value = state.ph;
+    document.getElementById('sel-regime').value = state.regime;
+    document.getElementById('ui-nps').textContent = state.nps;
+    document.getElementById('ui-ph').textContent = state.ph;
+
+    ['school','ename','bank','desig','acno','pan','kgid'].forEach(k => {
+      const el = document.getElementById('txt-'+k);
+      el.oninput = (e) => { state[k] = e.target.value; saveData(false); renderForm16(); renderKannada(); };
+    });
+    ['sel-hra','sel-kass','sel-ma','sel-el','sel-nps','sel-ph','sel-regime'].forEach(id => {
+      const el = document.getElementById(id);
+      el.onchange = (e) => { state[id.replace('sel-','')] = e.target.value; saveData(false); calcAll(); };
+    });
+
+    renderTable();
+    renderForm16();
+    renderKannada();
+  }
+
+  /* ============ TABLE RENDER ============ */
+  function renderTable() {
+    const tb = document.getElementById('table-body');
+    tb.innerHTML = '';
+
+    [...MONTHS, ...SPECIAL_ROWS, 'TOTAL'].forEach((key) => {
+      const isTotal = key === 'TOTAL';
+      const isSpecial = SPECIAL_ROWS.includes(key);
+      const row = isTotal ? null : state.rows.find(r => r.month === key) || {month:key, basic:0, da:0, hra:0, cca:0, ma:0, spl:0, ph:0, other:0, gross:0, kgid:0, lic:0, gis:0, kass:0, pt:0, gpf:0, nps:0, it:0, totalDeduct:0};
+
+      const tr = document.createElement('tr');
+      if (isTotal) tr.className = 'total-row';
+      tr.dataset.rowKey = key;
+
+      // Month cell
+      const tdM = document.createElement('td');
+      tdM.style.textAlign = 'left';
+      if (isTotal) { tdM.textContent = 'TOTAL'; tdM.style.fontWeight='900'; }
+      else if (isSpecial) { tdM.textContent = key; tdM.style.fontWeight='700'; tdM.style.background='#fffde7'; }
+      else { tdM.innerHTML = `<input class="mon" value="${row.month}" readonly>`; }
+      tr.appendChild(tdM);
+
+      // numeric cells
+      COL_KEYS.forEach((colKey) => {
+        const val = isTotal ? sumCol(colKey) : (isSpecial ? 0 : row[colKey]);
+        const td = document.createElement('td');
+        const input = document.createElement('input');
+        input.className = 'num';
+        input.type = 'text';
+        input.inputMode = 'numeric';
+        input.dataset.col = colKey;
+        input.value = val;
+
+        if (!isTotal && !isSpecial) {
+          input.onfocus = function() {
+            if (this.value === '0') this.select();
+          };
+          input.oninput = function(e) {
+            const cleaned = e.target.value.replace(/[^0-9.]/g, '');
+            if (e.target.value !== cleaned) e.target.value = cleaned;
+            const v = parseFloat(cleaned) || 0;
+            row[colKey] = v;
+            calcAll(true); // true = keep focus without destroying input DOM
+          };
+          input.onblur = function() {
+            if (this.value === '') this.value = '0';
+          };
+        } else {
+          input.readOnly = true;
+          input.style.fontWeight = '900';
+        }
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+
+      tb.appendChild(tr);
+    });
+  }
+
+  /* Update table cell values in-place so active input never loses focus */
+  function updateTableValuesInPlace() {
+    const activeEl = document.activeElement;
+    MONTHS.forEach(m => {
+      const tr = document.querySelector(`tr[data-row-key="${m}"]`);
+      const row = state.rows.find(r => r.month === m);
+      if (!tr || !row) return;
+      COL_KEYS.forEach(colKey => {
+        const inp = tr.querySelector(`input[data-col="${colKey}"]`);
+        if (inp && inp !== activeEl) {
+          inp.value = row[colKey];
+        }
+      });
+    });
+    const totalTr = document.querySelector(`tr[data-row-key="TOTAL"]`);
+    if (totalTr) {
+      COL_KEYS.forEach(colKey => {
+        const inp = totalTr.querySelector(`input[data-col="${colKey}"]`);
+        if (inp) inp.value = sumCol(colKey);
+      });
+    }
+  }
+
+  function sumCol(key) {
+    return MONTHS.reduce((s, m) => s + (state.rows.find(r=>r.month===m)[key] || 0), 0);
+  }
+
+  /* ============ CALCULATIONS ============ */
+  function calcAll(keepFocus = false) {
+    const hraRate = parseFloat(state.hra);
+    const npsOn = state.nps === 'YES';
+    const phOn = state.ph === 'YES';
+    const maOn = state.ma === 'YES';
+    const kassOn = state.kass === 'YES';
+
+    document.getElementById('ui-nps').textContent = state.nps;
+    document.getElementById('ui-ph').textContent = state.ph;
+
+    const daRateMap = {'Mar':15.75,'Apr':15.75,'May':15.75,'Jun':15.75,'Jul':18,'Aug':18,'Sep':18,'Oct':18,'Nov':18,'Dec':18,'Jan':18,'Feb':18};
+
+    MONTHS.forEach((m) => {
+      const row = state.rows.find(r => r.month === m);
+      if (!row) return;
+      const basic = parseFloat(row.basic) || 0;
+      const short = m.substring(0,3);
+      const daRate = daRateMap[short] || 18;
+      const da = Math.round(basic * daRate / 100);
+      const hra = Math.round(basic * hraRate / 100);
+      const cca = parseFloat(row.cca) || 0;
+      const ma = maOn ? 500 : 0;
+      const spl = parseFloat(row.spl) || 0;
+      const ph = phOn ? Math.round(basic * 6 / 100) : 0;
+      const other = parseFloat(row.other) || 0;
+      const gross = basic + da + hra + cca + ma + spl + ph + other;
+
+      const kgid = parseFloat(row.kgid) || 0;
+      const lic = parseFloat(row.lic) || 0;
+      const gis = parseFloat(row.gis) || 0;
+      const kass = kassOn ? 350 : 0;
+      const pt = 200;
+      const gpf = parseFloat(row.gpf) || 0;
+      const nps = npsOn ? Math.round((basic + da) * 10 / 100) : 0;
+      const it = parseFloat(row.it) || 0;
+      const totalDeduct = kgid + lic + gis + kass + pt + gpf + nps + it;
+
+      Object.assign(row, {da, hra, cca, ma, spl, ph, other, gross, kgid, lic, gis, kass, pt, gpf, nps, it, totalDeduct});
+    });
+
+    if (keepFocus) {
+      updateTableValuesInPlace();
+    } else {
+      renderTable();
+    }
+    renderForm16();
+    renderKannada();
+    saveData(false);
+  }
+
+  function copyMarToAll() {
+    const mar = state.rows.find(r => r.month === 'Mar-26');
+    if (!mar) return;
+    MONTHS.forEach(m => {
+      if (m === 'Mar-26') return;
+      const row = state.rows.find(r => r.month === m);
+      Object.assign(row, {...mar, month: m});
+    });
+    calcAll();
+  }
+
+  function clearZeros() {
+    state.rows.forEach(r => { if (r.month !== 'Mar-26') { r.basic = 0; r.cca = 0; r.spl = 0; r.other = 0; r.kgid = 0; r.lic = 0; r.gis = 0; r.gpf = 0; r.it = 0; } });
+    calcAll();
+  }
+
+  function resetForm() {
+    if (!confirm('Reset all data to defaults?')) return;
+    state.rows = MONTHS.map(m => ({
+      month: m, basic: 0, da: 0, hra: 0, cca: 0, ma: 0, spl: 0, ph: 0, other: 0,
+      gross: 0, kgid: 0, lic: 0, gis: 0, kass: 0, pt: 0, gpf: 0, nps: 0, it: 0, totalDeduct: 0
+    }));
+    state.rows[0] = { month:'Mar-26', basic:62800, da:9891, hra:4710, cca:0, ma:500, spl:0, ph:3768, other:0,
+      gross:81669, kgid:6000, lic:1684, gis:480, kass:0, pt:200, gpf:0, nps:7269, it:0, totalDeduct:15633 };
+    state.school=''; state.ename=''; state.bank=''; state.desig='Teacher'; state.acno=''; state.pan=''; state.kgid='';
+    state.hra='7.5'; state.kass='NO'; state.ma='YES'; state.el='NONE'; state.nps='YES'; state.ph='YES'; state.regime='YES';
+    renderUI();
+    calcAll();
+  }
+
+  /* ============ SAVE / LOAD ============ */
+  function saveData(showAlert = false) {
+    try {
+      localStorage.setItem('itc_fy2627_state', JSON.stringify(state));
+      const statusEl = document.getElementById('save-status');
+      if (statusEl) statusEl.textContent = '✔ ಸೇವ್ ಆಗಿದೆ (' + new Date().toLocaleTimeString() + ')';
+      if (showAlert) {
+        alert('✔ ಮಾಹಿತಿ ಯಶಸ್ವಿಯಾಗಿ ಸೇವ್ ಆಗಿದೆ! (Data Saved Successfully)');
+      }
+    } catch (e) {
+      if (showAlert) alert('ಸೇವ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ: ' + e.message);
+    }
+  }
+
+  function loadData() {
+    const saved = localStorage.getItem('itc_fy2627_state');
+    if (!saved) { alert('No saved data found.'); return; }
+    try { state = JSON.parse(saved); } catch(e) { alert('Saved data corrupted.'); return; }
+    renderUI();
+    calcAll();
+    alert('✔ ಸೇವ್ ಮಾಡಿದ ಮಾಹಿತಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಿದೆ!');
+  }
+
+  /* ============ TAX COMPUTATION ============ */
+  function computeTax() {
+    const gross = sumCol('gross');
+    const regime = state.regime;
+    const stdDed = regime === 'YES' ? 75000 : 50000;
+    const hraExempt = 0;
+    const ptDed = regime === 'YES' ? 0 : sumCol('pt');
+    const chapVIa = 0;
+
+    const incomeSalaries = Math.max(0, gross - hraExempt - stdDed - ptDed);
+    const gti = incomeSalaries;
+
+    let tax = 0;
+    let taxableAboveExempt = 0;
+    if (regime === 'YES') {
+      const exemption = 400000;
+      taxableAboveExempt = Math.max(0, gti - exemption);
+      const slabs = [
+        {limit: 400000, rate: 0.05},
+        {limit: 400000, rate: 0.10},
+        {limit: 400000, rate: 0.15},
+        {limit: 400000, rate: 0.20},
+        {limit: 400000, rate: 0.25},
+        {limit: Infinity, rate: 0.30}
+      ];
+      let remaining = taxableAboveExempt;
+      slabs.forEach(s => {
+        if (remaining <= 0) return;
+        const amt = Math.min(remaining, s.limit);
+        tax += amt * s.rate;
+        remaining -= amt;
+      });
+    } else {
+      const exemption = 250000;
+      taxableAboveExempt = Math.max(0, gti - exemption);
+      const slabs = [
+        {limit: 250000, rate: 0.05},
+        {limit: 250000, rate: 0.20},
+        {limit: 250000, rate: 0.20},
+        {limit: 250000, rate: 0.30},
+        {limit: 250000, rate: 0.30},
+        {limit: Infinity, rate: 0.30}
+      ];
+      let remaining = taxableAboveExempt;
+      slabs.forEach(s => {
+        if (remaining <= 0) return;
+        const amt = Math.min(remaining, s.limit);
+        tax += amt * s.rate;
+        remaining -= amt;
+      });
+    }
+
+    tax = Math.round(tax);
+    let rebate = 0;
+    if (regime === 'YES' && gti <= 1200000) {
+      rebate = Math.min(tax, 60000);
+    } else if (regime === 'NO' && gti <= 500000) {
+      rebate = Math.min(tax, 12500);
+    }
+
+    let taxAfterRebate = Math.max(0, tax - rebate);
+    let marginalRelief = 0;
+    let surcharge = 0;
+    let cess = Math.round((taxAfterRebate + surcharge) * 0.04);
+    let totalTax = taxAfterRebate + surcharge + cess;
+    const tds = sumCol('it');
+    const balance = totalTax - tds;
+
+    return {gross, stdDed, hraExempt, ptDed, incomeSalaries, gti, taxableAboveExempt, tax, rebate, taxAfterRebate, marginalRelief, surcharge, cess, totalTax, tds, balance, chapVIa};
+  }
+
+  /* ============ FORM-16 RENDER ============ */
+  function renderForm16() {
+    const t = computeTax();
+    const regimeLabel = state.regime === 'YES' ? 'NEW REGIME = YES' : 'OLD REGIME';
+    const hraPct = state.hra;
+    const kassLabel = state.kass;
+    const out = document.getElementById('form16-output');
+
+    out.innerHTML = `
+    <div style="border:1px solid #0b3d66; padding:10px; border-radius:6px; background:#fbfcfd;">
+      <div style="text-align:center; font-weight:900; font-size:14px; margin-bottom:6px; border-bottom:1px solid #0b3d66; padding-bottom:4px;">
+        CREATED BY SCHOOL RESOURCE CENTER | FORM-16 [See rule 31(1)(a)] - FY 2026-27 (AY 2027-28)
+      </div>
+      <div style="font-size:12px; margin:6px 0;">
+        Certificate under section 203 of the Income Tax Act, 1961 for Tax Deducted at Source on Salary
+      </div>
+      <table style="font-size:11.5px; margin-top:6px;">
+        <tr><td style="width:48%;">Name and Address of the Employer:</td><td>${state.school || 'Teacher'}</td></tr>
+        <tr><td>City:</td><td>Bengaluru</td></tr>
+        <tr><td>Name and Designation of the Employee:</td><td>${state.ename || '—'}</td></tr>
+        <tr><td>Bank: | A/C No: | KGID:</td><td>${state.bank || ''} | ${state.acno || ''} | ${state.kgid || ''}</td></tr>
+        <tr><td>NEW REGIME = YES | NPS = YES | HRA: 7.5% | KASS: NO</td><td>${regimeLabel} | NPS: ${state.nps} | HRA: ${hraPct}% | KASS: ${kassLabel}</td></tr>
+        <tr><td>PAN of Deductor: | TAN of Deductor:</td><td>${state.pan || ''} | </td></tr>
+        <tr><td>PAN of Employee: | Assessment Year:</td><td>${state.pan || ''} | 2027-28</td></tr>
+        <tr><td>CIT (TDS) / Last Update:</td><td>10-Feb-27</td></tr>
+        <tr><td>Period:</td><td>From 01/03/2026 To 28/02/2027 (FY 2026-27)</td></tr>
+      </table>
+
+      <div style="font-weight:900; margin-top:10px; font-size:13px; border-top:1px solid #0b3d66; padding-top:6px;">PART B (Annexure) - Details of Salary Paid and Any Other Income and Tax Deducted</div>
+
+      <table>
+        <tr><th>PARTICULARS</th><th>Rs.</th><th>Rs.</th><th>Rs.</th></tr>
+        <tr><td colspan=4>1. Gross Salary</td></tr>
+        <tr><td>&nbsp;&nbsp;a) Salary as per provisions contained in sec. 17(1)</td><td class="num">${t.gross}</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;b) Value of perquisites u/s 17(2) (as per Form No.12BA)</td><td>0</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;c) Profits in lieu of salary u/s 17(3) (as per Form No.12BB)</td><td>0</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;d) TOTAL (1a + 1b + 1c)</td><td></td><td></td><td class="bold">${t.gross}</td></tr>
+
+        <tr><td colspan=4>2. Less: Allowance to the extent exempt u/s 10</td></tr>
+        <tr><td>&nbsp;&nbsp;a) H.R.A. exemption u/s 10(13A) (Allowed in Old Regime)</td><td class="num">${t.hraExempt}</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;b) Medical reimbursement / Other exempt allowance</td><td>0</td><td></td><td></td></tr>
+        <tr><td></td><td></td><td>0</td><td></td></tr>
+
+        <tr><td>3. Balance (1 - 2)</td><td></td><td></td><td class="bold">${t.gross}</td></tr>
+
+        <tr><td colspan=4>4. Deductions u/s 16 &amp; 17:</td></tr>
+        <tr><td>&nbsp;&nbsp;a) Entertainment allowance / PH allowance [10(14)]</td><td class="num">0</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;b) Standard Deduction u/s 16(ia) (New: Rs.75,000 / Old: Rs.50,000)</td><td class="num">${t.stdDed}</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;c) Tax on Employment (Professional Tax u/s 16(iii) - Old Regime)</td><td class="num">${t.ptDed}</td><td></td><td></td></tr>
+        <tr><td>5. Aggregate of 4(a) to 4(c)</td><td></td><td></td><td class="bold">${t.stdDed + t.ptDed}</td></tr>
+
+        <tr><td>6. Income chargeable under the head 'Salaries' (3 - 5)</td><td></td><td></td><td class="bold">${t.incomeSalaries}</td></tr>
+
+        <tr><td colspan=4>7. Add: Any other income reported by the employee</td></tr>
+        <tr><td>&nbsp;&nbsp;24(a) Income from let out property / House Property</td><td class="num">0</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;a) Income from Pension / Family Pension</td><td class="num">0</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;b) Income from Saving Bank Interest</td><td class="num">0</td><td></td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;c) Income other than Saving Bank Interest (Exam / FD / Other)</td><td class="num">0</td><td></td><td></td></tr>
+        <tr><td></td><td></td><td>0</td><td></td></tr>
+
+        <tr><td>8. Gross Total Income (6 + 7)</td><td></td><td></td><td class="bold">${t.gti}</td></tr>
+
+        <tr><td colspan=4>9. Deductions under Chapter VI-A — (A) Sec 80C, 80CCC &amp; 80CCD(1)</td></tr>
+        <tr><td>&nbsp;&nbsp;i) GPF (Auto from Statement)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;ii) KGID (Auto from Statement)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;iii) GIS (Auto from Statement)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;iv) LIC Premium (Auto from Statement)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;v) NPS Employee Contribution (Auto from Statement)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;vi) Repayment of Housing Loan Principal (HLA)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;vii) 5 Years and above Bank FD Tax Saver / ULIP</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;viii) PPF / Mutual Funds Tax Saver (ELSS)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;ix) Postal Life Insurance (PLI) / NSC VIII</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td colspan=4>(Continued on next page)</td></tr>
+      </table>
+
+      <table style="margin-top:8px;">
+        <tr><th>PARTICULARS (CHAPTER VI-A CONTINUED &amp; TAX COMPUTATION)</th><th>Rs.</th><th>Gross Amount</th><th>Deductible</th></tr>
+        <tr><td>&nbsp;&nbsp;x) LIC Premium (Separate) / Sukanya Samriddhi Yojane (SSY)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;xi) Tuition Fee (Max 2 Children)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;xii) Other 80C Investments (Specify)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>Total up to Rs. 1,50,000 under Section 80C (Old Regime Only)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+
+        <tr><td colspan=4>(B) Other Sections (e.g. 80D, 80E, 80G, 80TTA, 80CCD(2) etc.) under Chapter VI-A</td></tr>
+        <tr><td>&nbsp;&nbsp;i) Under section 80D (Medical Insurance / KASS Rs.0 + Additional)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;ii) Under section 80DD (Maintenance of Disabled Dependent)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;iii) Under section 80DDB (Medical Treatment of Specified Diseases)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;iv) Under section 80E (Interest on Higher Education Loan)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;v) Under section 24(b) (Housing Loan Interest - Max Rs. 2,00,000)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;vi) Under section 80EE / 80EEA (Additional Home Loan Interest)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;vii) Under section 80G (Donations to Approved Funds)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;viii) Under section 80U (Person with Disability)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;ix) u/s 80TTA (Exempt Saving Bank Interest Max Rs. 10,000)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;x) Under section 80CCD(1B) (Additional NPS Self Contribution Max 50,000)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;xi) 80EEB - Interest paid on Loan for Electric Vehicle</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+        <tr><td>&nbsp;&nbsp;xii) 80CCD(2) NPS Contribution from Employer (Allowed in Both Regimes)</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+
+        <tr><td>10. Aggregate of Deductible Amount under Chapter VI-A</td><td></td><td></td><td class="bold">${t.chapVIa}</td></tr>
+        <tr><td>11. Total Taxable Income (8 - 10) (Rounded off u/s 288A)</td><td class="bold">${t.gti}</td><td class="bold">${t.gti}</td><td class="bold">${t.gti}</td></tr>
+        <tr><td>12. Amount Above Basic Exemption Limit for Tax Calculation</td><td class="bold">${t.taxableAboveExempt}</td><td class="bold">${t.taxableAboveExempt}</td><td class="bold">${t.taxableAboveExempt}</td></tr>
+
+        <tr><td>13a. TAX RATE 5% / 5% (Old: 2.5L–5L @5% | New: 4,00,001 to 8,00,000 @5%)</td><td></td><td></td><td class="bold">20000</td></tr>
+        <tr><td>13b. TAX RATE 20% / 10% (Old: 5L–7.5L @20% | New: 8,00,001 to 12,00,000 @10%)</td><td></td><td></td><td class="bold">13212</td></tr>
+        <tr><td>13c. TAX RATE 20% / 15% (Old: 7.5L–10L @20% | New: 12,00,001 to 16,00,000 @15%)</td><td></td><td></td><td class="bold">0</td></tr>
+        <tr><td>13d. TAX RATE 30% / 20% (Old: 10L–12.5L @30% | New: 16,00,001 to 20,00,000 @20%)</td><td></td><td></td><td class="bold">0</td></tr>
+        <tr><td>13e. TAX RATE 30% / 25% (Old: 12.5L–15L @30% | New: 20,00,001 to 24,00,000 @25%)</td><td></td><td></td><td class="bold">0</td></tr>
+        <tr><td>13f. TAX RATE 30% / 30% (Old: Above 15,00,000 | New: Above 24,00,000 @30%)</td><td></td><td></td><td class="bold">0</td></tr>
+
+        <tr><td>14. Less: Rebate u/s 87A (New Slab up to 12L: Max Rs.60,000 | Old up to 5L: Rs.12,500) &amp; Marginal Relief</td><td></td><td></td><td class="bold">${t.rebate}</td></tr>
+        <tr><td>15. Health &amp; Education Cess @ 4%</td><td></td><td></td><td class="bold">${t.cess}</td></tr>
+        <tr><td>16. Total Tax Payable</td><td></td><td></td><td class="bold total-row">${t.totalTax}</td></tr>
+        <tr><td>17. Less: Tax Deducted at Source u/s 192(1) (From Salary Statement)</td><td></td><td></td><td class="bold">${t.tds}</td></tr>
+        <tr><td>18. Balance Tax Payable / Refundable (16 - 17)</td><td></td><td></td><td class="bold total-row">${t.balance}</td></tr>
+      </table>
+
+      <div style="margin-top:10px; font-size:12px;"><b>ನಾನು New Regime ನ್ನು ಆಯ್ಕೆಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೇನೆ ಮತ್ತು ಆಯ್ಕೆ ಮಾಡಿಕೊಂಡಿದ್ದೇನೆ.</b></div>
+
+      <div style="margin-top:12px; font-weight:900; font-size:13px; border-top:1px solid #0b3d66; padding-top:6px;">VERIFICATION</div>
+      <div style="font-size:11.5px; margin-top:6px;">
+        I, <span style="text-decoration:underline; display:inline-block; width:220px;"></span>, son/daughter of <span style="text-decoration:underline; display:inline-block; width:220px;"></span> working in the capacity of Teacher do hereby certify that a sum of Rs. ${t.balance} has been deducted and deposited to the credit of the Central Government. I further certify that the information given above is true, complete and correct and is based on the books of accounts, documents, TDS statements, TDS deposited and other available records.
+      </div>
+      <table style="margin-top:8px; font-size:11.5px;">
+        <tr><td style="width:50%;">Place:</td><td style="width:50%;">Signature of person responsible for deduction of tax</td></tr>
+        <tr><td>Date: 10-Feb-27</td><td>Full Name: <span style="text-decoration:underline; display:inline-block; width:200px;"></span></td></tr>
+        <tr><td></td><td>Designation: Teacher</td></tr>
+      </table>
+      <div style="font-size:11px; margin-top:8px;">ಉಚಿತ ವಿತರಣೆ: SCHOOL RESOURCE CENTER </div>
+    </div>
+    `;
+  }
+
+  /* ============ KANNADA FORM RENDER ============ */
+  function renderKannada() {
+    const t = computeTax();
+    const gross = t.gross;
+    const hraReceived = sumCol('hra');
+    const basicDA = sumCol('basic') + sumCol('da');
+    const fortyPct = Math.round(basicDA * 40 / 100);
+    const rentPaid = 0;
+    const rentExcess10 = rentPaid - Math.round((basicDA) * 10 / 100);
+    const phTotal = sumCol('ph');
+    const ptTotal = sumCol('pt');
+
+    const out = document.getElementById('kannada-output');
+    out.innerHTML = `
+    <div style="border:1px solid #0b3d66; padding:10px; border-radius:6px; background:#fbfcfd;">
+      <div style="text-align:center; font-weight:900; font-size:14px; margin-bottom:6px; border-bottom:1px solid #0b3d66; padding-bottom:4px;">
+        CREATED BY SCHOOL RESOURCE CENTER  | ಆದಾಯ ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರದ ನಮೂನೆ (2026-27)
+      </div>
+      <div style="text-align:center; font-size:12px; margin-bottom:8px;">
+        ಆದಾಯ ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರದ ನಮೂನೆ - ಮಾರ್ಚ್ 2026 ರಿಂದ ಫೆಬ್ರುವರಿ 2027 ರ ವರೆಗೆ (ಆರ್ಥಿಕ ವರ್ಷ: 2026-27 | ಕರ ನಿರ್ಧರಣಾ ವರ್ಷ: 2027-28)
+      </div>
+      <table style="font-size:12px; margin-bottom:8px;">
+        <tr><td style="width:33%;">ನೌಕರರ ಹೆಸರು:</td><td>${state.ename || '________________________'}</td><td>ಪದನಾಮ / ಹುದ್ದೆ:</td><td>________________________</td></tr>
+        <tr><td>ಕಾರ್ಯ ನಿರ್ವಹಿಸುತ್ತಿರುವ ಸ್ಥಳ:</td><td>________________________</td><td>ಕೆ.ಜಿ.ಐ.ಡಿ ಸಂಖ್ಯೆ (KGID):</td><td>${state.kgid || '________________________'}</td></tr>
+        <tr><td>ಪ್ಯಾನ್ ಸಂಖ್ಯೆ (PAN No):</td><td>${state.pan || '________________________'}</td><td>ಬ್ಯಾಂಕ್ ಮತ್ತು ಖಾತೆ ಸಂಖ್ಯೆ:</td><td>${state.bank || '____________'} | A/C: ${state.acno || '____________'}</td></tr>
+        <tr><td>ತೆರಿಗೆ ಪದ್ಧತಿ (Regime):</td><td>NEW REGIME = YES (ಹೊಸ ಪದ್ಧತಿ)</td><td>ಯೋಜನೆ ಮತ್ತು ಭತ್ಯೆ ವಿವರ:</td><td>NPS: ${state.nps} | HRA: ${state.hra}% | KASS: ${state.kass}</td></tr>
+      </table>
+
+      <table>
+        <tr><th>ಕ್ರಮ ಸಂಖ್ಯೆ</th><th>ಆದಾಯ ಮತ್ತು ಕಡಿತಗಳ ವಿವರಗಳು (PARTICULARS)</th><th>ರೂ.</th><th>ಒಟ್ಟು ರೂ.</th></tr>
+        <tr><td>1</td><td>ಸಂಬಳದ ವಾರ್ಷಿಕ ಒಟ್ಟು ಅನುದಾನ (ಅನುಬಂಧ-1 ರ ನಮೂನೆಯಲ್ಲಿ ಒದಗಿಸುವುದು - Gross Salary)</td><td></td><td class="bold">${gross}</td></tr>
+        <tr><td colspan=4>2 ಕಡಿತಗಳು: ಮನೆ ಬಾಡಿಗೆ ಭತ್ಯೆ ವಿನಾಯಿತಿ - HRA Exemption u/s 10(13A)</td></tr>
+        <tr><td>&nbsp;&nbsp;a)</td><td>Actual HRA received (ಪಡೆದ ಒಟ್ಟು ಮನೆ ಬಾಡಿಗೆ ಭತ್ಯೆ)</td><td class="num">${hraReceived}</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;b)</td><td>House rent paid in excess of 10% of salary (ವಾರ್ಷಿಕ ಪಾವತಿಸಿದ ಬಾಡಿಗೆ: ರೂ. ${rentPaid})</td><td class="num">${rentExcess10}</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;c)</td><td>ವೇತನದ ಶೇ.40 ರಷ್ಟು ಭಾಗ (Basic+DA) — ಇವುಗಳಲ್ಲಿ ಕನಿಷ್ಠ ಮೊತ್ತ (Allowed in Old Regime)</td><td class="num">${fortyPct}</td><td class="bold">0</td></tr>
+        <tr><td colspan=4>3 a) PH ALLOWANCE [10(14)] / ಅಂಗವಿಕಲರ ಭತ್ಯೆ (ಪಡೆದ ಒಟ್ಟು PH ಭತ್ಯೆ: ರೂ. ${phTotal})</td></tr>
+        <tr><td>&nbsp;&nbsp;b)</td><td>ಸಾರಿಗೆ ಭತ್ಯೆ (Transport Allowance)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;c)</td><td>ವೈದ್ಯಕೀಯ ಭತ್ಯೆ (Medical Reimbursement)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;d)</td><td>ವೃತ್ತಿ ತೆರಿಗೆ [ವಿಧಿ 16(iii)] (Professional Tax: ಒಟ್ಟು ಪಾವತಿ ರೂ. ${ptTotal} - Old Regime ನಲ್ಲಿ ಕಡಿತ)</td><td class="num">${state.regime==='YES'?0:ptTotal}</td><td class="bold">${state.regime==='YES'?0:ptTotal}</td></tr>
+        <tr><td>4</td><td>ಇತರೆ ಕಡಿತಗಳು (ಇದ್ದಲ್ಲಿ) / STANDARD DEDUCTION u/s 16(ia)</td><td></td><td class="bold">${t.stdDed}</td></tr>
+        <tr><td>5</td><td>ಒಟ್ಟು ಕಡಿತಗಳು (2 + 3 + 4)</td><td></td><td class="bold">${t.stdDed + (state.regime==='YES'?0:ptTotal)}</td></tr>
+        <tr><td>6</td><td>ಸಂಬಳದ ನಿವ್ವಳ ಆದಾಯ (1 - 5)</td><td></td><td class="bold">${t.incomeSalaries}</td></tr>
+        <tr><td colspan=4>7 ಇತರೆ ಆದಾಯಗಳು (Other Income)</td></tr>
+        <tr><td>&nbsp;&nbsp;1.</td><td>ಬ್ಯಾಂಕ್ ಠೇವಣಿಗಳ ಮೇಲಿನ ಬಡ್ಡಿ (Saving Bank Interest)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;2.</td><td>NSC (8ನೇ ಮಾಲೆಯ ಮೇಲಿನ ಬಡ್ಡಿ) / Pension Income</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;3.</td><td>ಪರೀಕ್ಷಾ ಸಂಭಾವನೆ / ಇತರೆ ಸಂಭಾವನೆ</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;4.</td><td>ಇತರೆ ಮೂಲಗಳಿಂದ ಬಂದ ಆದಾಯ (Any other income reported)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td>8</td><td>ಕಡಿತಗಳು ಸೆಕ್ಷನ್ 24(B) ಗೃಹಸಾಲದ ಮೇಲಿನ ಬಡ್ಡಿ (ಗರಿಷ್ಠ ರೂ. 2,00,000/- Old Regime)</td><td></td><td class="bold">0</td></tr>
+        <tr><td>9</td><td>ಒಟ್ಟು ಆದಾಯ - Gross Total Income (6 + 7 - 8)</td><td></td><td class="bold">${t.gti}</td></tr>
+
+        <tr><td colspan=4>10 (80C) ಕಡಿತಗಳು: Deduction u/s 80C, 80CCC, 80CCD, 80CCE (ಗರಿಷ್ಠ ರೂ. 1,50,000 - Old Regime)</td></tr>
+        <tr><td>&nbsp;&nbsp;a)</td><td>ಸಾಮೂಹಿಕ ವಿಮೆ (GIS)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;b)</td><td>ಭಾ.ಜೀ.ವಿಮೆ (LIC)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;c)</td><td>ಮಕ್ಕಳ ಬೋಧನಾ ಶುಲ್ಕ (Tuition Fee)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;d)</td><td>ಸಾಮಾನ್ಯ ಭವಿಷ್ಯ ನಿಧಿ (GPF)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;e)</td><td>ಕ.ಸರ್ಕಾರಿ ವಿಮೆ (KGID)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;f)</td><td>ಎನ್.ಪಿ.ಎಸ್ (NPS Employee 80CCD(1))</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;g)</td><td>ಸುಕನ್ಯಾ ಸಮೃದ್ಧಿ ಯೋಜನೆ / ಪ್ರತ್ಯೇಕ ಎಲ್.ಐ.ಸಿ (SSY / Separate LIC)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;h)</td><td>ಅಂಚೆ ಜೀವ ವಿಮೆ (Postal Life Insurance / NSC)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;i)</td><td>ಗೃಹ ಸಾಲದ ಅಸಲು ಮರುಪಾವತಿ (Home Loan Principal - HLA)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;j)</td><td>ಯು.ಟಿ.ಐ (ULIP) / 5 ವರ್ಷ ಮೇಲ್ಪಟ್ಟ ಬ್ಯಾಂಕ್ ಠೇವಣಿ (Tax Saver FD)</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;k)</td><td>ಸಾರ್ವಜನಿಕ ಭವಿಷ್ಯ ನಿಧಿ (PPF) / Mutual Funds Tax Saver</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;l)</td><td>NSC VIII Issue / NSS / Post Office 5 Yrs Deposit</td><td class="num">0</td><td></td></tr>
+        <tr><td>&nbsp;&nbsp;m)</td><td>ಇತರೆ 80C ಉಳಿತಾಯಗಳು (Others)</td><td class="num">0</td><td></td></tr>
+        <tr><td></td><td>ಒಟ್ಟು 80C ಉಳಿತಾಯ ಮೊತ್ತ (Gross 80C Total)</td><td class="num">0</td><td></td></tr>
+        <tr><td></td><td>ಅನುಮತಿಸಲಾದ 80C ಕಡಿತ (ಗರಿಷ್ಠ ರೂ. 1,50,000 ಮಿತಿಗೊಳಪಟ್ಟು - Deductible 80C)</td><td></td><td class="bold">0</td></tr>
+        <tr><td colspan=4>(Continued on next page)</td></tr>
+      </table>
+
+      <table style="margin-top:8px;">
+        <tr><th>ಕ್ರ.ಸಂ</th><th>ವಿವರಗಳು (CHAPTER VI-A ಉಳಿದ ಕಡಿತಗಳು ಮತ್ತು ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರ)</th><th>ರೂ.</th><th>ಒಟ್ಟು ರೂ.</th></tr>
+        <tr><td>10</td><td>(B) t) Deduction u/s 80D ವೈದ್ಯಕೀಯ ವಿಮೆ / KASS (ಸ್ವಂತ/ಕುಟುಂಬಕ್ಕೆ 25,000/-, ಹಿರಿಯ ನಾಗರಿಕರಿಗೆ 50,000/-)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>u) Deduction u/s 80DD ಅವಲಂಬಿತ ಅಂಗವಿಕಲರ ವೈದ್ಯಕೀಯ ವೆಚ್ಚಕ್ಕೆ (75,000 / 1,25,000)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>v) Deduction u/s 80DDB ನಿರ್ಧರಿತ ರೋಗಗಳ ಚಿಕಿತ್ಸೆಗಾಗಿ ಮಾಡಿದ ವೆಚ್ಚ (40,000 / 1,00,000)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>w) Deduction u/s 80U ಸ್ವಂತ ಅಂಗವಿಕಲತೆ (75,000 / 1,25,000)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>x) Deduction u/s 80G ದೇಣಿಗೆಗಳು (Donations)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>1) Under Section 80CCD(1B) ಹೆಚ್ಚುವರಿ ಎನ್.ಪಿ.ಎಸ್ ವಂತಿಗೆ (ಗರಿಷ್ಠ ರೂ. 50,000)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>2) Under Section 80CCD(2) ಸರ್ಕಾರದ ಎನ್.ಪಿ.ಎಸ್ ವಂತಿಗೆ (NPS Contribution from Employer)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>3) Deduction u/s 80E ಉನ್ನತ ವಿದ್ಯಾಭ್ಯಾಸದ ಸಾಲದ ಮೇಲಿನ ಬಡ್ಡಿ</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>4) 80EE / 80EEB ಗೃಹ ಸಾಲ / ಎಲೆಕ್ಟ್ರಿಕ್ ವಾಹನ ಸಾಲದ ಬಡ್ಡಿ</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>5) 80TTA ಉಳಿತಾಯ ಖಾತೆಯಿಂದ ಬರುವ ಬಡ್ಡಿ (ಗರಿಷ್ಠ ರೂ. 10,000)</td><td class="num">0</td><td class="bold">0</td></tr>
+        <tr><td></td><td>ಒಟ್ಟು ಅಧ್ಯಾಯ VI-A ಕಡಿತಗಳು (Total Chapter VI-A Deductions: 80C + Other Sections)</td><td></td><td class="bold">0</td></tr>
+        <tr><td>11</td><td>ತೆರಿಗೆಗೆ ಒಳಪಡುವ ನಿವ್ವಳ ಆದಾಯ - Total Taxable Income (9 - 10)</td><td></td><td class="bold">${t.gti}</td></tr>
+        <tr><td>12</td><td>ತೆರಿಗೆ ಗಣನೆಗೆ ಒಳಪಡುವ ಮೊತ್ತ - AMOUNT FOR TAX (Above Basic Exemption)</td><td></td><td class="bold">${t.taxableAboveExempt}</td></tr>
+        <tr><td>13</td><td>TAX RATE 5% / 5% (Old: 2.50L–5.00L | New: 4,00,001 ರಿಂದ 8,00,000 ರ ವರೆಗೆ @ 5%)</td><td></td><td class="bold">20000</td></tr>
+        <tr><td>14</td><td>TAX RATE 20% / 10% (Old: 5.00L–7.50L | New: 8,00,001 ರಿಂದ 12,00,000 ರ ವರೆಗೆ @ 10%)</td><td></td><td class="bold">13212</td></tr>
+        <tr><td>15</td><td>TAX RATE 20% / 15% (Old: 7.50L–10.00L | New: 12,00,001 ರಿಂದ 16,00,000 ರ ವರೆಗೆ @ 15%)</td><td></td><td class="bold">0</td></tr>
+        <tr><td>16</td><td>TAX RATE 30% / 20% (Old: 10.00L–12.50L | New: 16,00,001 ರಿಂದ 20,00,000 ರ ವರೆಗೆ @ 20%)</td><td></td><td class="bold">0</td></tr>
+        <tr><td>17</td><td>TAX RATE 30% / 25% (Old: 12.50L–15.00L | New: 20,00,001 ರಿಂದ 24,00,000 ರ ವರೆಗೆ @ 25%)</td><td></td><td class="bold">0</td></tr>
+        <tr><td>18</td><td>TAX RATE 30% / 30% (Old: Above 15,00,000 | New: 24,00,000 ಮೇಲ್ಪಟ್ಟು @ 30%)</td><td></td><td class="bold">0</td></tr>
+        <tr><td>19</td><td>ಒಟ್ಟು ಲೆಕ್ಕಹಾಕಿದ ತೆರಿಗೆ (Gross Tax Before Rebate u/s 87A) [Rebate Elig: 60000]</td><td class="bold">${t.tax}</td><td class="bold">60000</td></tr>
+        <tr><td>20</td><td>TAX BEFORE MARGINAL RELIEF (87A ರಿಯಾಯಿತಿ ನಂತರದ ತೆರಿಗೆ)</td><td></td><td class="bold">${t.taxAfterRebate}</td></tr>
+        <tr><td>21</td><td>MARGINAL RELIEF (ಅಂಚಿನ ರಿಯಾಯಿತಿ - ಅನ್ವಯಿಸಿದಲ್ಲಿ)</td><td></td><td class="bold">${t.marginalRelief}</td></tr>
+        <tr><td>22</td><td>TAX AFTER MARGINAL RELIEF</td><td></td><td class="bold">${t.taxAfterRebate}</td></tr>
+        <tr><td>23</td><td>SURCHARGE (ಮೇಲ್ತೆರಿಗೆ)</td><td></td><td class="bold">${t.surcharge}</td></tr>
+        <tr><td>24</td><td>HEALTH &amp; EDUCATION CESS @ 4% (ಶಿಕ್ಷಣ ಮತ್ತು ಆರೋಗ್ಯ ಉಪತರ)</td><td></td><td class="bold">${t.cess}</td></tr>
+        <tr><td>25</td><td>ಒಟ್ಟು ಪಾವತಿಸಬೇಕಾದ ತೆರಿಗೆ - TOTAL TAX PAYABLE</td><td></td><td class="bold total-row">${t.totalTax}</td></tr>
+      </table>
+
+      <div style="margin-top:10px; font-size:12px;"><b>ನಾನು New Regime ನ್ನು ಆಯ್ಕೆಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೇನೆ ಮತ್ತು ಆಯ್ಕೆ ಮಾಡಿಕೊಂಡಿದ್ದೇನೆ.</b></div>
+
+      <div style="margin-top:12px; font-weight:900; font-size:13px; border-top:1px solid #0b3d66; padding-top:6px;">ಪ್ರಮಾಣ ಪತ್ರ (DECLARATION CERTIFICATE)</div>
+      <ol style="font-size:11.5px; line-height:1.6;">
+        <li>ನಾನು ಪಿತ್ರಾರ್ಜಿತ / ಸ್ವಯಂ ಅರ್ಜಿತ / ಬಾಡಿಗೆ ಮನೆಯಲ್ಲಿ ವಾಸಿಸುತ್ತಿದ್ದೇನೆ.</li>
+        <li>ನಾನು ಪ್ರತಿ ಮಾಹೆ ರೂ. 0 ಗಳನ್ನು ಮನೆ ಬಾಡಿಗೆಗಾಗಿ ವಾಸಿಸುತ್ತಿರುವ ಮನೆಗೆ ಕೊಡುತ್ತಿದ್ದೇನೆ. ಈ ಬಗ್ಗೆ ಪರಿಶೀಲನೆಗಾಗಿ 2026 ಮಾರ್ಚ್ ರಿಂದ 2027 ಫೆಬ್ರುವರಿ ಮಾಹೆಯ ಬಾಡಿಗೆ ರಸೀದಿಗಳನ್ನು ಒಪ್ಪಿಸಿದ್ದೇನೆ.</li>
+        <li>ನಾನು ಯಾವುದೇ ಇತರೆ ಅನಧಿಕೃತ ಸೌಲಭ್ಯ / ಭತ್ಯೆಗಳನ್ನು ಪಡೆಯುತ್ತಿರುವುದಿಲ್ಲ.</li>
+        <li>ನಾನು ಈ ನಮೂನೆಯಲ್ಲಿ ನೀಡಿರುವ ಮಾಹಿತಿ ನನಗೆ ತಿಳಿದ ಮಟ್ಟಿಗೆ ಸತ್ಯವಾಗಿರುತ್ತದೆ ಎಂದು ಪ್ರಾಮಾಣೀಕರಿಸುತ್ತೇನೆ.</li>
+      </ol>
+      <div style="margin-top:8px; font-size:11.5px;">ಸ್ಥಳ: <span style="text-decoration:underline; display:inline-block; width:140px;"></span> | ದಿನಾಂಕ:  </div>
+      <div style="font-size:11.5px;">ಉದ್ಯೋಗಿಯ ಸಹಿ (Signature of Employee) <span style="text-decoration:underline; display:inline-block; width:200px;"></span></div>
+      <div style="font-size:11px; margin-top:6px;">ಇದು ಒಂದು ಇನ್ಕಮ್ ಟ್ಯಾಕ್ಸ್ ಟುಲ್ - SCHOOL RESOURCE CENTER </div>
+    </div>
+    `;
+  }
+
+  /* ============ PRINT ============ */
+  function printAll() {
+    const t = computeTax();
+    const gross = t.gross;
+    const hraReceived = sumCol('hra');
+    const basicDA = sumCol('basic') + sumCol('da');
+    const fortyPct = Math.round(basicDA * 40 / 100);
+    const rentExcess10 = 0 - Math.round(basicDA * 10 / 100);
+    const phTotal = sumCol('ph');
+    const ptTotal = sumCol('pt');
+
+    // Page 1: Salary & Deduction Statement
+    let page1 = `
+    <div style="font-family:'Segoe UI',sans-serif;">
+      <div style="background:#0b3d66; color:#fff; padding:10px 14px; border-radius:6px; text-align:center;">
+        <div style="font-size:14px; font-weight:900;">AUTOMATIC INCOME TAX CALCULATOR - FY 2026-27 (AY 2027-28)</div>
+        <div style="font-size:10px; margin-top:3px;">CREATED BY SCHOOL RESOURCE CENTER | DA: 15.75%/18% | NPS (10%): ${state.nps}/NO | KASS 350 & MA 500 | PT: Rs.200 | EL Month Option | HRA: ${state.hra}%/15%/20% | PH 6%: ${state.ph}/NO</div>
+      </div>
+      <div style="margin-top:8px;">
+        <table style="width:100%; border-collapse:collapse; font-size:10.5px; margin-bottom:6px;">
+          <tr><td style="width:33%; border:1px solid #6b7a8c; padding:4px;"><b>SCHOOL / OFFICE:</b> ${state.school || 'ಶಾಲೆ / ಕಚೇರಿಯ ಹೆಸರು'}</td>
+              <td style="width:33%; border:1px solid #6b7a8c; padding:4px;"><b>EMPLOYEE NAME:</b> ${state.ename || 'ನೌಕರರ ಹೆಸರು'}</td>
+              <td style="width:34%; border:1px solid #6b7a8c; padding:4px;"><b>BANK NAME:</b> ${state.bank || 'ಬ್ಯಾಂಕ್ ಹೆಸರು'}</td></tr>
+          <tr><td style="border:1px solid #6b7a8c; padding:4px;"><b>DESIGNATION:</b> ${state.desig || 'ಪದನಾಮ / ಹುದ್ದೆ'}</td>
+              <td style="border:1px solid #6b7a8c; padding:4px;"><b>BANK A/C NO:</b> ${state.acno || 'ಬ್ಯಾಂಕ್ ಖಾತೆ ಸಂಖ್ಯೆ'}</td>
+              <td style="border:1px solid #6b7a8c; padding:4px;"><b>PAN NO:</b> ${state.pan || 'PAN ಸಂಖ್ಯೆ'}</td></tr>
+          <tr><td style="border:1px solid #6b7a8c; padding:4px;"><b>KGID NO:</b> ${state.kgid || 'KGID ಸಂಖ್ಯೆ'}</td>
+              <td style="border:1px solid #6b7a8c; padding:4px;" colspan=2><b>HRA, KASS & MA:</b> HRA: C - ${state.hra}% &nbsp;|&nbsp; KASS(350): ${state.kass} &nbsp;|&nbsp; MA(500): ${state.ma} &nbsp;|&nbsp; EL ತಿಂಗಳು: ${state.el}</td></tr>
+          <tr><td style="border:1px solid #6b7a8c; padding:4px;" colspan=3><b>NPS, PH &amp; REGIME:</b> NPS: ${state.nps} &nbsp;|&nbsp; PH: ${state.ph} &nbsp;|&nbsp; NEW REG: ${state.regime}</td></tr>
+        </table>
+    `;
+
+    page1 += `<table style="width:100%; border-collapse:collapse; font-size:9px; margin-bottom:6px;">
+      <thead><tr style="background:#0b3d66; color:#fff;">`;
+    const headers = ['MONTH','BASIC','DA','HRA','CCA','MA','Spl','PH','Other','GROSS','KGID','LIC','GIS','KASS','P.T','GPF','NPS','IT','TOTAL DED'];
+    headers.forEach(h => page1 += `<th style="border:1px solid #6b7a8c; padding:2px 3px;">${h}</th>`);
+    page1 += `</tr></thead><tbody>`;
+
+    [...MONTHS, ...SPECIAL_ROWS, 'TOTAL'].forEach(key => {
+      const isTotal = key === 'TOTAL';
+      const row = isTotal ? null : state.rows.find(r => r.month === key);
+      page1 += `<tr${isTotal ? ' style="font-weight:900; background:#eaf0f6;"' : ''}>`;
+      page1 += `<td style="border:1px solid #6b7a8c; padding:2px 3px; text-align:left;${isTotal||SPECIAL_ROWS.includes(key)?'font-weight:700;background:#fffde7;':''}">${isTotal ? 'TOTAL' : SPECIAL_ROWS.includes(key) ? key : row.month}</td>`;
+      const vals = [
+        isTotal ? sumCol('basic') : (SPECIAL_ROWS.includes(key) ? 0 : row.basic),
+        isTotal ? sumCol('da') : (SPECIAL_ROWS.includes(key) ? 0 : row.da),
+        isTotal ? sumCol('hra') : (SPECIAL_ROWS.includes(key) ? 0 : row.hra),
+        isTotal ? sumCol('cca') : (SPECIAL_ROWS.includes(key) ? 0 : row.cca),
+        isTotal ? sumCol('ma') : (SPECIAL_ROWS.includes(key) ? 0 : row.ma),
+        isTotal ? sumCol('spl') : (SPECIAL_ROWS.includes(key) ? 0 : row.spl),
+        isTotal ? sumCol('ph') : (SPECIAL_ROWS.includes(key) ? 0 : row.ph),
+        isTotal ? sumCol('other') : (SPECIAL_ROWS.includes(key) ? 0 : row.other),
+        isTotal ? sumCol('gross') : (SPECIAL_ROWS.includes(key) ? 0 : row.gross),
+        isTotal ? sumCol('kgid') : (SPECIAL_ROWS.includes(key) ? 0 : row.kgid),
+        isTotal ? sumCol('lic') : (SPECIAL_ROWS.includes(key) ? 0 : row.lic),
+        isTotal ? sumCol('gis') : (SPECIAL_ROWS.includes(key) ? 0 : row.gis),
+        isTotal ? sumCol('kass') : (SPECIAL_ROWS.includes(key) ? 0 : row.kass),
+        isTotal ? sumCol('pt') : (SPECIAL_ROWS.includes(key) ? 0 : row.pt),
+        isTotal ? sumCol('gpf') : (SPECIAL_ROWS.includes(key) ? 0 : row.gpf),
+        isTotal ? sumCol('nps') : (SPECIAL_ROWS.includes(key) ? 0 : row.nps),
+        isTotal ? sumCol('it') : (SPECIAL_ROWS.includes(key) ? 0 : row.it),
+        isTotal ? sumCol('totalDeduct') : (SPECIAL_ROWS.includes(key) ? 0 : row.totalDeduct)
+      ];
+      vals.forEach(v => page1 += `<td style="border:1px solid #6b7a8c; padding:2px 3px; text-align:right;">${v}</td>`);
+      page1 += `</tr>`;
+    });
+
+    page1 += `</tbody></table>
+    <div style="font-size:10px; margin-top:4px;">
+      <b>* DA:</b> Jan-Jun 15.75% &amp; Jul-Feb 18% &nbsp;|&nbsp; <b>HRA:</b> ${state.hra}% of Basic Pay &nbsp;|&nbsp; <b>NPS:</b> 10% of (Basic + DA) &nbsp;|&nbsp; <b>PH:</b> 6% of Basic Pay &nbsp;|&nbsp; <b>MA:</b> Rs.500 fixed &nbsp;|&nbsp; <b>KASS:</b> Rs.350 fixed &nbsp;|&nbsp; <b>PT:</b> Rs.200 fixed
+    </div>
+    </div></div>`;
+    document.getElementById('page1').innerHTML = page1;
+
+    // Page 2: Form-16 Part B page 1
+    let page2 = `
+    <div style="font-family:'Segoe UI',sans-serif;">
+      <div style="background:#0b3d66; color:#fff; padding:10px 14px; border-radius:6px; text-align:center;">
+        <div style="font-size:14px; font-weight:900;">FORM-16 [See rule 31(1)(a)] - FY 2026-27 (AY 2027-28)</div>
+        <div style="font-size:10.5px; margin-top:3px;">Certificate under section 203 of the Income Tax Act, 1961 for Tax Deducted at Source on Salary</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:10.5px; margin-top:8px;">
+        <tr><td style="width:50%; border:1px solid #6b7a8c; padding:4px;"><b>Name and Address of the Employer:</b> ${state.school || 'Teacher'}</td>
+            <td style="border:1px solid #6b7a8c; padding:4px;"><b>Name and Designation of the Employee:</b> ${state.ename || '—'}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:4px;"><b>Bank: | A/C No: | KGID:</b> ${state.bank || ''} | ${state.acno || ''} | ${state.kgid || ''}</td>
+            <td style="border:1px solid #6b7a8c; padding:4px;"><b>NEW REGIME = ${state.regime} | NPS = ${state.nps} | HRA: ${state.hra}% | KASS: ${state.kass}</b></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:4px;"><b>PAN of Deductor: | TAN of Deductor:</b> ${state.pan || ''} | </td>
+            <td style="border:1px solid #6b7a8c; padding:4px;"><b>PAN of Employee: | Assessment Year:</b> ${state.pan || ''} | 2027-28</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:4px;"><b>CIT (TDS) / Last Update:</b> 10-Feb-27</td>
+            <td style="border:1px solid #6b7a8c; padding:4px;"><b>Period:</b> From 01/03/2026 To 28/02/2027 (FY 2026-27)</td></tr>
+      </table>
+      <div style="font-weight:900; margin-top:8px; font-size:12px; border-top:1px solid #0b3d66; padding-top:5px;">PART B (Annexure) - Details of Salary Paid and Any Other Income and Tax Deducted</div>
+      <table style="width:100%; border-collapse:collapse; font-size:10.5px; margin-top:6px;">
+        <tr><th style="border:1px solid #6b7a8c; padding:3px 4px; text-align:left;">PARTICULARS</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">Rs.</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">Rs.</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">Rs.</th></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>1. Gross Salary</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">a) Salary as per provisions contained in sec. 17(1)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${t.gross}</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b) Value of perquisites u/s 17(2)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">c) Profits in lieu of salary u/s 17(3)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">d) TOTAL (1a + 1b + 1c)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gross}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>2. Less: Allowance to the extent exempt u/s 10</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">a) H.R.A. exemption u/s 10(13A) (Allowed in Old Regime)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b) Medical reimbursement / Other exempt allowance</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">3. Balance (1 - 2)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gross}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>4. Deductions u/s 16 &amp; 17:</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">a) Entertainment allowance / PH allowance [10(14)]</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b) Standard Deduction u/s 16(ia) (New: Rs.75,000 / Old: Rs.50,000)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${t.stdDed}</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">c) Tax on Employment (Professional Tax u/s 16(iii) - Old Regime)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${t.ptDed}</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">5. Aggregate of 4(a) to 4(c)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.stdDed + t.ptDed}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">6. Income chargeable under the head 'Salaries' (3 - 5)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.incomeSalaries}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>7. Add: Any other income reported by the employee</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">24(a) Income from let out property / House Property</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">a) Income from Pension / Family Pension</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b) Income from Saving Bank Interest</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">c) Income other than Saving Bank Interest</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">8. Gross Total Income (6 + 7)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gti}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>9. Deductions under Chapter VI-A — (A) Sec 80C, 80CCC &amp; 80CCD(1)</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">i) GPF (Auto from Statement)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">ii) KGID (Auto from Statement)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">iii) GIS (Auto from Statement)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">iv) LIC Premium (Auto from Statement)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">v) NPS Employee Contribution (Auto from Statement)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">vi) Repayment of Housing Loan Principal (HLA)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">vii) 5 Years and above Bank FD Tax Saver / ULIP</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">viii) PPF / Mutual Funds Tax Saver (ELSS)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">ix) Postal Life Insurance (PLI) / NSC VIII</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+      </table>
+    </div>`;
+    document.getElementById('page2').innerHTML = page2;
+
+    // Page 3: Form-16 Part B page 2
+    let page3 = `
+    <div style="font-family:'Segoe UI',sans-serif;">
+      <div style="background:#0b3d66; color:#fff; padding:10px 14px; border-radius:6px; text-align:center;">
+        <div style="font-size:13px; font-weight:900;">FORM-16 PART B (CONTD.) - FY 2026-27 (AY 2027-28)</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:10.5px; margin-top:8px;">
+        <tr><th style="border:1px solid #6b7a8c; padding:3px 4px; text-align:left;">PARTICULARS (CHAPTER VI-A CONTINUED &amp; TAX COMPUTATION)</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">Rs.</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">Gross Amount</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">Deductible</th></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">x) LIC Premium (Separate) / SSY</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">xi) Tuition Fee (Max 2 Children)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">xii) Other 80C Investments (Specify)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">Total up to Rs. 1,50,000 under Section 80C (Old Regime Only)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>(B) Other Sections under Chapter VI-A</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">i) Under section 80D (Medical Insurance / KASS)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">ii) Under section 80DD</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">iii) Under section 80DDB</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">iv) Under section 80E</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">v) Under section 24(b) (Housing Loan Interest)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">vi) Under section 80EE / 80EEA</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">vii) Under section 80G</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">viii) Under section 80U</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">ix) u/s 80TTA</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">x) Under section 80CCD(1B)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">xi) 80EEB</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">xii) 80CCD(2) NPS Contribution from Employer</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">10. Aggregate of Deductible Amount under Chapter VI-A</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.chapVIa}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">11. Total Taxable Income (8 - 10) (Rounded off u/s 288A)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gti}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gti}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gti}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">12. Amount Above Basic Exemption Limit for Tax Calculation</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.taxableAboveExempt}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.taxableAboveExempt}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.taxableAboveExempt}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13a. TAX RATE 5% / 5%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">20000</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13b. TAX RATE 20% / 10%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">13212</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13c. TAX RATE 20% / 15%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13d. TAX RATE 30% / 20%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13e. TAX RATE 30% / 25%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13f. TAX RATE 30% / 30%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">14. Less: Rebate u/s 87A &amp; Marginal Relief</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.rebate}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">15. Health &amp; Education Cess @ 4%</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.cess}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">16. Total Tax Payable</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.totalTax}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">17. Less: Tax Deducted at Source u/s 192(1)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.tds}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">18. Balance Tax Payable / Refundable (16 - 17)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.balance}</td></tr>
+      </table>
+      <div style="margin-top:8px; font-size:11px;"><b>ನಾನು New Regime ನ್ನು ಆಯ್ಕೆಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೇನೆ ಮತ್ತು ಆಯ್ಕೆ ಮಾಡಿಕೊಂಡಿದ್ದೇನೆ.</b></div>
+      <div style="margin-top:8px; font-weight:900; font-size:12px; border-top:1px solid #0b3d66; padding-top:5px;">VERIFICATION</div>
+      <div style="font-size:10.5px; margin-top:5px;">
+        I, <span style="text-decoration:underline; display:inline-block; width:200px;"></span>, son/daughter of <span style="text-decoration:underline; display:inline-block; width:200px;"></span> working in the capacity of Teacher do hereby certify that a sum of Rs. ${t.balance} has been deducted and deposited to the credit of the Central Government. I further certify that the information given above is true, complete and correct.
+      </div>
+      <table style="width:100%; border-collapse:collapse; margin-top:6px; font-size:10.5px;">
+        <tr><td style="width:50%; border:1px solid #6b7a8c; padding:4px;">Place:</td><td style="border:1px solid #6b7a8c; padding:4px;">Signature of person responsible for deduction of tax</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:4px;">Date: 10-Feb-27</td><td style="border:1px solid #6b7a8c; padding:4px;">Full Name: <span style="text-decoration:underline; display:inline-block; width:180px;"></span></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:4px;"></td><td style="border:1px solid #6b7a8c; padding:4px;">Designation: Teacher</td></tr>
+      </table>
+      <div style="font-size:10px; margin-top:6px;">ಉಚಿತ ವಿತರಣೆ: SCHOOL RESOURCE CENTER </div>
+    </div>`;
+    document.getElementById('page3').innerHTML = page3;
+
+    // Page 4: Kannada Tax Computation Form Page 1
+    let page4 = `
+    <div style="font-family:'Noto Sans Kannada','Segoe UI',sans-serif;">
+      <div style="background:#0b3d66; color:#fff; padding:10px 14px; border-radius:6px; text-align:center;">
+        <div style="font-size:13px; font-weight:900;">ಆದಾಯ ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರದ ನಮೂನೆ (2026-27)</div>
+        <div style="font-size:10.5px; margin-top:3px;">ಆದಾಯ ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರದ ನಮೂನೆ - ಮಾರ್ಚ್ 2026 ರಿಂದ ಫೆಬ್ರುವರಿ 2027 ರ ವರೆಗೆ</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:8px;">
+        <tr><td style="width:25%; border:1px solid #6b7a8c; padding:4px;"><b>ನೌಕರರ ಹೆಸರು:</b> ${state.ename || '________________________'}</td>
+            <td style="width:25%; border:1px solid #6b7a8c; padding:4px;"><b>ಪದನಾಮ / ಹುದ್ದೆ:</b> ________________________</td>
+            <td style="width:25%; border:1px solid #6b7a8c; padding:4px;"><b>ಕಾರ್ಯ ನಿರ್ವಹಿಸುತ್ತಿರುವ ಸ್ಥಳ:</b> ________________________</td>
+            <td style="border:1px solid #6b7a8c; padding:4px;"><b>ಕೆ.ಜಿ.ಐ.ಡಿ ಸಂಖ್ಯೆ (KGID):</b> ${state.kgid || '________________________'}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:4px;"><b>ಪ್ಯಾನ್ ಸಂಖ್ಯೆ (PAN No):</b> ${state.pan || '________________________'}</td>
+            <td style="border:1px solid #6b7a8c; padding:4px;"><b>ಬ್ಯಾಂಕ್ ಮತ್ತು ಖಾತೆ ಸಂಖ್ಯೆ:</b> ${state.bank || '____________'} | A/C: ${state.acno || '____________'}</td>
+            <td style="border:1px solid #6b7a8c; padding:4px;" colspan=2><b>ತೆರಿಗೆ ಪದ್ಧತಿ (Regime):</b> NEW REGIME = ${state.regime} &nbsp;|&nbsp; <b>ಯೋಜನೆ ಮತ್ತು ಭತ್ಯೆ ವಿವರ:</b> NPS: ${state.nps} | HRA: ${state.hra}% | KASS: ${state.kass}</td></tr>
+      </table>
+      <table style="width:100%; border-collapse:collapse; font-size:10.5px; margin-top:6px;">
+        <tr><th style="border:1px solid #6b7a8c; padding:3px 4px; text-align:left;">ಕ್ರಮ ಸಂಖ್ಯೆ</th><th style="border:1px solid #6b7a8c; padding:3px 4px; text-align:left;">ಆದಾಯ ಮತ್ತು ಕಡಿತಗಳ ವಿವರಗಳು (PARTICULARS)</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">ರೂ.</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು ರೂ.</th></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">1</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸಂಬಳದ ವಾರ್ಷಿಕ ಒಟ್ಟು ಅನುದಾನ (Gross Salary)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${gross}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>2 ಕಡಿತಗಳು: ಮನೆ ಬಾಡಿಗೆ ಭತ್ಯೆ ವಿನಾಯಿತಿ - HRA Exemption u/s 10(13A)</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">a)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">Actual HRA received</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${hraReceived}</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">House rent paid in excess of 10% of salary</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${rentExcess10}</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">c)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ವೇತನದ ಶೇ.40 ರಷ್ಟು ಭಾಗ (Basic+DA)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${fortyPct}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>3 a) PH ALLOWANCE [10(14)] (ಪಡೆದ ಒಟ್ಟು PH ಭತ್ಯೆ: ರೂ. ${phTotal})</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸಾರಿಗೆ ಭತ್ಯೆ (Transport Allowance)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">c)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ವೈದ್ಯಕೀಯ ಭತ್ಯೆ (Medical Reimbursement)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">d)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ವೃತ್ತಿ ತೆರಿಗೆ [ವಿಧಿ 16(iii)] (Professional Tax: ರೂ. ${ptTotal})</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">${state.regime==='YES'?0:ptTotal}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${state.regime==='YES'?0:ptTotal}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">4</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">STANDARD DEDUCTION u/s 16(ia)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.stdDed}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">5</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು ಕಡಿತಗಳು (2 + 3 + 4)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.stdDed + (state.regime==='YES'?0:ptTotal)}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">6</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸಂಬಳದ ನಿವ್ವಳ ಆದಾಯ (1 - 5)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.incomeSalaries}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>7 ಇತರೆ ಆದಾಯಗಳು (Other Income)</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">1.</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಬ್ಯಾಂಕ್ ಠೇವಣಿಗಳ ಮೇಲಿನ ಬಡ್ಡಿ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">2.</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">NSC / Pension Income</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">3.</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಪರೀಕ್ಷಾ ಸಂಭಾವನೆ / ಇತರೆ ಸಂಭಾವನೆ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">4.</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಇತರೆ ಮೂಲಗಳಿಂದ ಬಂದ ಆದಾಯ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">8</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಕಡಿತಗಳು ಸೆಕ್ಷನ್ 24(B) ಗೃಹಸಾಲದ ಮೇಲಿನ ಬಡ್ಡಿ</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">9</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು ಆದಾಯ - Gross Total Income (6 + 7 - 8)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gti}</td></tr>
+
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;" colspan=4>10 (80C) ಕಡಿತಗಳು: Deduction u/s 80C, 80CCC, 80CCD, 80CCE (ಗರಿಷ್ಠ ರೂ. 1,50,000 - Old Regime)</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">a)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸಾಮೂಹಿಕ ವಿಮೆ (GIS)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">b)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಭಾ.ಜೀ.ವಿಮೆ (LIC)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">c)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಮಕ್ಕಳ ಬೋಧನಾ ಶುಲ್ಕ (Tuition Fee)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">d)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸಾಮಾನ್ಯ ಭವಿಷ್ಯ ನಿಧಿ (GPF)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">e)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಕ.ಸರ್ಕಾರಿ ವಿಮೆ (KGID)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">f)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಎನ್.ಪಿ.ಎಸ್ (NPS Employee 80CCD(1))</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">g)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸುಕನ್ಯಾ ಸಮೃದ್ಧಿ ಯೋಜನೆ (SSY / Separate LIC)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">h)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಅಂಚೆ ಜೀವ ವಿಮೆ (PLI / NSC)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">i)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಗೃಹ ಸಾಲದ ಅಸಲು ಮರುಪಾವತಿ (HLA)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">j)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಯು.ಟಿ.ಐ (ULIP) / Tax Saver FD</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">k)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಸಾರ್ವಜನಿಕ ಭವಿಷ್ಯ ನಿಧಿ (PPF) / Mutual Funds Tax Saver</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">l)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">NSC VIII Issue / NSS / Post Office 5 Yrs Deposit</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">m)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಇತರೆ 80C ಉಳಿತಾಯಗಳು (Others)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು 80C ಉಳಿತಾಯ ಮೊತ್ತ (Gross 80C Total)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಅನುಮತಿಸಲಾದ 80C ಕಡಿತ (ಗರಿಷ್ಠ ರೂ. 1,50,000 ಮಿತಿಗೊಳಪಟ್ಟು)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+      </table>
+    </div>`;
+    document.getElementById('page4').innerHTML = page4;
+
+    // Page 5: Kannada Tax Computation Form Page 2
+    let page5 = `
+    <div style="font-family:'Noto Sans Kannada','Segoe UI',sans-serif;">
+      <div style="background:#0b3d66; color:#fff; padding:10px 14px; border-radius:6px; text-align:center;">
+        <div style="font-size:12px; font-weight:900;">ಆದಾಯ ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರದ ನಮೂನೆ (ಭಾಗ-2) - FY 2026-27</div>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:10.5px; margin-top:8px;">
+        <tr><th style="border:1px solid #6b7a8c; padding:3px 4px; text-align:left;">ಕ್ರ.ಸಂ</th><th style="border:1px solid #6b7a8c; padding:3px 4px; text-align:left;">ವಿವರಗಳು (CHAPTER VI-A ಉಳಿದ ಕಡಿತಗಳು ಮತ್ತು ತೆರಿಗೆ ಲೆಕ್ಕಾಚಾರ)</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">ರೂ.</th><th style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು ರೂ.</th></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">10</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">(B) t) Deduction u/s 80D ವೈದ್ಯಕೀಯ ವಿಮೆ / KASS</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">u) Deduction u/s 80DD ಅವಲಂಬಿತ ಅಂಗವಿಕಲರ ವೈದ್ಯಕೀಯ ವೆಚ್ಚಕ್ಕೆ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">v) Deduction u/s 80DDB ನಿರ್ಧರಿತ ರೋಗಗಳ ಚಿಕಿತ್ಸೆಗಾಗಿ ಮಾಡಿದ ವೆಚ್ಚ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">w) Deduction u/s 80U ಸ್ವಂತ ಅಂಗವಿಕಲತೆ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">x) Deduction u/s 80G ದೇಣಿಗೆಗಳು (Donations)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">1) Under Section 80CCD(1B) ಹೆಚ್ಚುವರಿ ಎನ್.ಪಿ.ಎಸ್ ವಂತಿಗೆ (ಗರಿಷ್ಠ ರೂ. 50,000)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">2) Under Section 80CCD(2) ಸರ್ಕಾರದ ಎನ್.ಪಿ.ಎಸ್ ವಂತಿಗೆ (NPS Contribution from Employer)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">3) Deduction u/s 80E ಉನ್ನತ ವಿದ್ಯಾಭ್ಯಾಸದ ಸಾಲದ ಮೇಲಿನ ಬಡ್ಡಿ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">4) 80EE / 80EEB ಗೃಹ ಸಾಲ / ಎಲೆಕ್ಟ್ರಿಕ್ ವಾಹನ ಸಾಲದ ಬಡ್ಡಿ</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px;">5) 80TTA ಉಳಿತಾಯ ಖಾತೆಯಿಂದ ಬರುವ ಬಡ್ಡಿ (ಗರಿಷ್ಠ ರೂ. 10,000)</td><td style="border:1px solid #6b7a8c; padding:3px 4px; text-align:right;">0</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">ಒಟ್ಟು ಅಧ್ಯಾಯ VI-A ಕಡಿತಗಳು (Total Chapter VI-A Deductions: 80C + Other Sections)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">11</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ತೆರಿಗೆಗೆ ಒಳಪಡುವ ನಿವ್ವಳ ಆದಾಯ - Total Taxable Income (9 - 10)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.gti}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">12</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ತೆರಿಗೆ ಗಣನೆಗೆ ಒಳಪಡುವ ಮೊತ್ತ - AMOUNT FOR TAX (Above Basic Exemption)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.taxableAboveExempt}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">13</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX RATE 5% / 5% (Old: 2.50L–5.00L | New: 4,00,001 ರಿಂದ 8,00,000 ರ ವರೆಗೆ @ 5%)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">20000</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">14</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX RATE 20% / 10% (Old: 5.00L–7.50L | New: 8,00,001 ರಿಂದ 12,00,000 ರ ವರೆಗೆ @ 10%)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">13212</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">15</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX RATE 20% / 15% (Old: 7.50L–10.00L | New: 12,00,001 ರಿಂದ 16,00,000 ರ ವರೆಗೆ @ 15%)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">16</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX RATE 30% / 20% (Old: 10.00L–12.50L | New: 16,00,001 ರಿಂದ 20,00,000 ರ ವರೆಗೆ @ 20%)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">17</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX RATE 30% / 25% (Old: 12.50L–15.00L | New: 20,00,001 ರಿಂದ 24,00,000 ರ ವರೆಗೆ @ 25%)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">18</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX RATE 30% / 30% (Old: Above 15,00,000 | New: 24,00,000 ಮೇಲ್ಪಟ್ಟು @ 30%)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">0</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">19</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು ಲೆಕ್ಕಹಾಕಿದ ತೆರಿಗೆ (Gross Tax Before Rebate u/s 87A) [Rebate Elig: 60000]</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.tax}</td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">60000</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">20</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX BEFORE MARGINAL RELIEF (87A ರಿಯಾಯಿತಿ ನಂತರದ ತೆರಿಗೆ)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.taxAfterRebate}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">21</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">MARGINAL RELIEF (ಅಂಚಿನ ರಿಯಾಯಿತಿ - ಅನ್ವಯಿಸಿದಲ್ಲಿ)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.marginalRelief}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">22</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">TAX AFTER MARGINAL RELIEF</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.taxAfterRebate}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">23</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">SURCHARGE (ಮೇಲ್ತೆರಿಗೆ)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.surcharge}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px;">24</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">HEALTH &amp; EDUCATION CESS @ 4% (ಶಿಕ್ಷಣ ಮತ್ತು ಆರೋಗ್ಯ ಉಪತರ)</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.cess}</td></tr>
+        <tr><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800;">25</td><td style="border:1px solid #6b7a8c; padding:3px 4px;">ಒಟ್ಟು ಪಾವತಿಸಬೇಕಾದ ತೆರಿಗೆ - TOTAL TAX PAYABLE</td><td style="border:1px solid #6b7a8c; padding:3px 4px;"></td><td style="border:1px solid #6b7a8c; padding:3px 4px; font-weight:800; text-align:right;">${t.totalTax}</td></tr>
+      </table>
+      <div style="margin-top:8px; font-size:11px;"><b>ನಾನು New Regime ನ್ನು ಆಯ್ಕೆಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುತ್ತೇನೆ ಮತ್ತು ಆಯ್ಕೆ ಮಾಡಿಕೊಂಡಿದ್ದೇನೆ.</b></div>
+      <div style="margin-top:8px; font-weight:900; font-size:12px; border-top:1px solid #0b3d66; padding-top:5px;">ಪ್ರಮಾಣ ಪತ್ರ (DECLARATION CERTIFICATE)</div>
+      <ol style="font-size:10.5px; line-height:1.6;">
+        <li>ನಾನು ಪಿತ್ರಾರ್ಜಿತ / ಸ್ವಯಂ ಅರ್ಜಿತ / ಬಾಡಿಗೆ ಮನೆಯಲ್ಲಿ ವಾಸಿಸುತ್ತಿದ್ದೇನೆ.</li>
+        <li>ನಾನು ಪ್ರತಿ ಮಾಹೆ ರೂ. 0 ಗಳನ್ನು ಮನೆ ಬಾಡಿಗೆಗಾಗಿ ವಾಸಿಸುತ್ತಿರುವ ಮನೆಗೆ ಕೊಡುತ್ತಿದ್ದೇನೆ. ಈ ಬಗ್ಗೆ ಪರಿಶೀಲನೆಗಾಗಿ 2026 ಮಾರ್ಚ್ ರಿಂದ 2027 ಫೆಬ್ರುವರಿ ಮಾಹೆಯ ಬಾಡಿಗೆ ರಸೀದಿಗಳನ್ನು ಒಪ್ಪಿಸಿದ್ದೇನೆ.</li>
+        <li>ನಾನು ಯಾವುದೇ ಇತರೆ ಅನಧಿಕೃತ ಸೌಲಭ್ಯ / ಭತ್ಯೆಗಳನ್ನು ಪಡೆಯುತ್ತಿರುವುದಿಲ್ಲ.</li>
+        <li>ನಾನು ಈ ನಮೂನೆಯಲ್ಲಿ ನೀಡಿರುವ ಮಾಹಿತಿ ನನಗೆ ತಿಳಿದ ಮಟ್ಟಿಗೆ ಸತ್ಯವಾಗಿರುತ್ತದೆ ಎಂದು ಪ್ರಾಮಾಣೀಕರಿಸುತ್ತೇನೆ.</li>
+      </ol>
+      <div style="margin-top:6px; font-size:10.5px;">ಸ್ಥಳ: <span style="text-decoration:underline; display:inline-block; width:140px;"></span> | ದಿನಾಂಕ: 10-Feb-27</div>
+      <div style="font-size:10.5px;">ಉದ್ಯೋಗಿಯ ಸಹಿ (Signature of Employee) <span style="text-decoration:underline; display:inline-block; width:200px;"></span></div>
+      <div style="font-size:10px; margin-top:6px;">ಇದು ಒಂದು ಇನ್ಕಮ್ ಟ್ಯಾಕ್ಸ್ ಟುಲ್ - SCHOOL RESOURCE CENTER </div>
+    </div>`;
+    document.getElementById('page5').innerHTML = page5;
+
+    window.print();
+  }
+
+  /* ============ START ============ */
+  init();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <!-- ಇದು ಮೊಬೈಲ್‌ನಲ್ಲಿಯೂ ಡೆಸ್ಕ್‌ಟಾಪ್ ವ್ಯೂ ಬರುವುದನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ -->
+    <meta name="viewport" content="width=1200, initial-scale=1.0">
+    <title>ನಿಮ್ಮ ಪೇಜ್ ಶೀರ್ಷಿಕೆ</title>
+</head>
+
+
+
+
+
+
+
+<style>
+@media print{
+  .no-print{
+    display:none !important;
+  }
+}
+</style>
+
+<div class="no-print" style="text-align:center;margin:15px 0;">
+  <a href="https://bilingualmediumschools.blogspot.com/2026/04/home-page.html"
+     target="_blank"
+     style="display:inline-block;
+            background:#1565c0;
+            color:#fff;
+            text-decoration:none;
+            padding:10px 18px;
+            border-radius:8px;
+            font-weight:bold;
+            font-size:16px;">
+<br> ಇದರಲ್ಲಿ ಸಣ್ಣಪುಟ್ಟ ವ್ಯತ್ಯಾಸಗಳು ಇರಬಹುದು ಮುಂದೆ ಅವುಗಳನ್ನ ಸರಿಪಡಿಸಲಾಗುವುದು<br>
+    🌐 School Resource Centre – Click Here to Visit
+  </a>
+</div>
+
+
+
